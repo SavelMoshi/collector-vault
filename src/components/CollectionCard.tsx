@@ -1,26 +1,37 @@
+import { deleteCollection } from "@/actions/collection-actions";
+import DeleteCollectionButton from "@/components/DeleteCollectionButton";
+
 type CollectionCardProps = {
+  id: string;
   name: string;
   description: string | null;
   itemCount: number;
 };
 
 export default function CollectionCard({
+  id,
   name,
   description,
   itemCount,
 }: CollectionCardProps) {
+  const deleteCollectionWithId = deleteCollection.bind(null, id);
+
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md">
-      <h2 className="text-2xl font-semibold text-gray-900">
-        {name}
-      </h2>
+    <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-semibold text-white">{name}</h2>
 
-      <p className="mt-1 text-sm font-medium text-blue-600">
-        {itemCount} {itemCount === 1 ? "Item" : "Items"}
-      </p>
+          <p className="mt-1 text-sm text-gray-400">
+            {itemCount} {itemCount === 1 ? "Item" : "Items"}
+          </p>
+        </div>
 
-      <p className="mt-2 text-gray-600">
-        {description ?? "No description provided."}
+      <DeleteCollectionButton action={deleteCollectionWithId} />
+      </div>
+
+      <p className="mt-4 text-gray-300">
+        {description || "No description provided."}
       </p>
     </div>
   );

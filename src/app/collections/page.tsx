@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import CollectionCard from "@/components/CollectionCard";
 
@@ -28,9 +29,12 @@ export default async function CollectionsPage() {
           </p>
         </div>
 
-        <button className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">
-          + New Collection
-        </button>
+      <Link
+        href="/collections/new"
+        className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+      >
+        + New Collection
+      </Link>
       </div>
 
     {collections.length === 0 ? (
@@ -48,6 +52,7 @@ export default async function CollectionsPage() {
         {collections.map((collection) => (
           <CollectionCard
             key={collection.id}
+            id={collection.id}
             name={collection.name}
             description={collection.description}
             itemCount={collection._count.items}
