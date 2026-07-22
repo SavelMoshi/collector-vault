@@ -1,6 +1,5 @@
 "use server";
 
-
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -42,7 +41,6 @@ export async function createCollection(formData: FormData) {
 }
 
 export async function deleteCollection(id: string) {
-  "use server";
 
   await prisma.collection.delete({
     where: {
@@ -51,4 +49,57 @@ export async function deleteCollection(id: string) {
   });
 
   revalidatePath("/collections");
+}
+
+  export async function createItem(
+  collectionId: string,
+  formData: FormData,
+) {
+  const name = formData.get("name") as string;
+
+  const category = formData.get("category") as string;
+
+  const description = formData.get("description") as string;
+
+  const condition = formData.get("condition") as
+    | "MINT"
+    | "NEAR_MINT"
+    | "EXCELLENT"
+    | "GOOD"
+    | "FAIR"
+    | "POOR";
+
+  const estimatedValue =
+    Number(formData.get("estimatedValue")) || 0;
+
+  const purchasePrice =
+    formData.get("purchasePrice") === ""
+      ? null
+      : Number(formData.get("purchasePrice"));
+
+  const releaseYear =
+    formData.get("releaseYear") === ""
+      ? null
+      : Number(formData.get("releaseYear"));
+
+  const isFavorite =
+    formData.get("isFavorite") === "on";
+
+  await prisma.item.create({
+    data: {
+      name,
+      category,
+      description,
+      condition,
+      estimatedValue,
+      purchasePrice,
+      releaseYear,
+      isFavorite,
+      collectionId,
+    },
+  });
+
+  revalidatePath(`/collections/${collectionId}`);
+
+  redirect(`/collections/${collectionId}`);
 }
