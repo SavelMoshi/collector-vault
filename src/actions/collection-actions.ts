@@ -103,3 +103,72 @@ export async function deleteCollection(id: string) {
 
   redirect(`/collections/${collectionId}`);
 }
+
+export async function deleteItem(
+  itemId: string,
+  collectionId: string,
+) {
+  await prisma.item.delete({
+    where: {
+      id: itemId,
+    },
+  });
+
+  revalidatePath(`/collections/${collectionId}`);
+}
+
+export async function updateItem(
+  itemId: string,
+  collectionId: string,
+  formData: FormData,
+) {
+  const name = formData.get("name") as string;
+  const category = formData.get("category") as string;
+  const description = formData.get("description") as string;
+
+  const condition = formData.get("condition") as
+    | "MINT"
+    | "NEAR_MINT"
+    | "EXCELLENT"
+    | "GOOD"
+    | "FAIR"
+    | "POOR";
+
+  const estimatedValue = Number(
+    formData.get("estimatedValue"),
+  );
+
+  const purchasePriceValue = formData.get(
+    "purchasePrice",
+  ) as string;
+
+  const releaseYearValue = formData.get(
+    "releaseYear",
+  ) as string;
+
+  const isFavorite =
+    formData.get("isFavorite") === "on";
+
+  await prisma.item.update({
+    where: {
+      id: itemId,
+    },
+    data: {
+      name,
+      category: category || null,
+      description: description || null,
+      condition,
+      estimatedValue,
+      purchasePrice: purchasePriceValue
+        ? Number(purchasePriceValue)
+        : null,
+      releaseYear: releaseYearValue
+        ? Number(releaseYearValue)
+        : null,
+      isFavorite,
+    },
+  });
+
+  revalidatePath(`/collections/${collectionId}`);
+  redirect(`/collections/${collectionId}`);
+}

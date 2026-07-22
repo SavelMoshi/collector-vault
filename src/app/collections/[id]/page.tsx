@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import DeleteItemButton from "@/components/DeleteItemButton";
 import { prisma } from "@/lib/prisma";
 
 type CollectionPageProps = {
@@ -148,6 +149,20 @@ export default async function CollectionPage({
                     </p>
                   )}
                 </div>
+
+                <div className="mt-6 flex items-center justify-between">
+                <Link
+                  href={`/collections/${collection.id}/items/${item.id}/edit`}
+                  className="rounded-md border border-blue-900 px-3 py-2 text-sm font-medium text-blue-400 transition hover:bg-blue-950"
+                >
+                  Edit
+                </Link>
+
+                <DeleteItemButton
+                  itemId={item.id}
+                  collectionId={collection.id}
+                />
+              </div>
               </article>
             ))}
           </div>

@@ -1,20 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { deleteCollection } from "@/actions/collection-actions";
+import { deleteItem } from "@/actions/collection-actions";
 
-type DeleteCollectionButtonProps = {
+type DeleteItemButtonProps = {
+  itemId: string;
   collectionId: string;
 };
 
-export default function DeleteCollectionButton({
+export default function DeleteItemButton({
+  itemId,
   collectionId,
-}: DeleteCollectionButtonProps) {
+}: DeleteItemButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleDelete() {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this collection? This will also delete all items inside it.",
+      "Are you sure you want to delete this item?",
     );
 
     if (!confirmed) {
@@ -23,7 +25,7 @@ export default function DeleteCollectionButton({
 
     setIsDeleting(true);
 
-    await deleteCollection(collectionId);
+    await deleteItem(itemId, collectionId);
   }
 
   return (
