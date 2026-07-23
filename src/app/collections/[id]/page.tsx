@@ -1,18 +1,46 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteItemButton from "@/components/DeleteItemButton";
+import ItemControls from "@/components/ItemControls";
 import { prisma } from "@/lib/prisma";
 
 type CollectionPageProps = {
   params: Promise<{
     id: string;
   }>;
+
+  searchParams: Promise<{
+    search?: string;
+    favorites?: string;
+    sort?: string;
+  }>;
 };
 
 export default async function CollectionPage({
   params,
+  searchParams,
 }: CollectionPageProps) {
   const { id } = await params;
+
+  const {
+    search = "",
+    favorites,
+    sort = "newest",
+  } = await searchParams;
+
+  const hasActiveFilters =
+  search.trim() !== "" || favorites === "true";
+
+  const itemOrderBy =
+  sort === "oldest"
+    ? { createdAt: "asc" as const }
+    : sort === "name"
+      ? { name: "asc" as const }
+      : sort === "value-high"
+        ? { estimatedValue: "desc" as const }
+        : sort === "value-low"
+          ? { estimatedValue: "asc" as const }
+          : { createdAt: "desc" as const };
 
   const collection = await prisma.collection.findUnique({
     where: {
@@ -20,9 +48,32 @@ export default async function CollectionPage({
     },
     include: {
       items: {
-        orderBy: {
-          createdAt: "desc",
+        where: {
+          isFavorite:
+            favorites === "true" ? true : undefined,
+
+          OR: search
+            ? [
+                {
+                  name: {
+                    contains: search,
+                  },
+                },
+                {
+                  category: {
+                    contains: search,
+                  },
+                },
+                {
+                  description: {
+                    contains: search,
+                  },
+                },
+              ]
+            : undefined,
         },
+
+        orderBy: itemOrderBy,
       },
       _count: {
         select: {
@@ -60,9 +111,9 @@ export default async function CollectionPage({
               Items
             </h2>
 
-            <p className="mt-1 text-gray-400">
-              View and manage the items in this collection.
-            </p>
+          <p className="mt-1 text-gray-400">
+            Showing {collection.items.length} of {collection._count.items} items
+          </p>
           </div>
 
           <Link
@@ -73,32 +124,37 @@ export default async function CollectionPage({
           </Link>
         </div>
 
-        {collection.items.length === 0 ? (
-          <div className="mt-8 rounded-lg border border-dashed border-gray-700 px-6 py-12 text-center">
-            <h3 className="text-lg font-semibold text-white">
-              No items yet
-            </h3>
+        <ItemControls collectionId={collection.id} />
 
-            <p className="mt-2 text-gray-400">
-              Add your first item to start building this collection.
-            </p>
-          </div>
-        ) : (
+          {collection.items.length === 0 ? (
+            <div className="mt-8 rounded-lg border border-dashed border-gray-700 px-6 py-12 text-center">
+              <h3 className="text-lg font-semibold text-white">
+                {hasActiveFilters
+                  ? "No matching items"
+                  : "No items yet"}
+              </h3>
+
+              <p className="mt-2 text-gray-400">
+                {hasActiveFilters
+                  ? "Try changing your search or removing the favorites filter."
+                  : "Add your first item to start building this collection."}
+              </p>
+            </div>
+          ) : (
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {collection.items.map((item) => (
               <article
                 key={item.id}
-                className="rounded-xl border border-gray-800 bg-gray-950 p-6"
-              >
+                className="rounded-xl border border-gray-800 bg-gray-950 p-6 transition hover:-translate-y-1 hover:border-blue-700 hover:shadow-lg"              >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-semibold text-white">
                       {item.name}
                     </h3>
 
-                    <p className="mt-1 text-sm text-gray-400">
+                    <span className="mt-2 inline-flex rounded-full bg-blue-900/40 px-3 py-1 text-xs font-medium text-blue-300">
                       {item.category || "Uncategorized"}
-                    </p>
+                    </span>
                   </div>
 
                   {item.isFavorite && (
@@ -117,20 +173,19 @@ export default async function CollectionPage({
                 </p>
 
                 <div className="mt-6 space-y-2 text-sm text-gray-400">
-                  <p>
-                    <span className="font-medium text-gray-200">
-                      Condition:
-                    </span>{" "}
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-200">
+                    Condition:
+                  </span>
+
+                  <span className="rounded-full bg-emerald-900/40 px-2 py-1 text-xs font-medium text-emerald-300">
                     {item.condition.replaceAll("_", " ")}
-                  </p>
+                  </span>
+                </div>
 
-                  <p>
-                    <span className="font-medium text-gray-200">
-                      Estimated value:
-                    </span>{" "}
-                    ${item.estimatedValue.toFixed(2)}
-                  </p>
-
+                <p className="text-lg font-semibold text-green-400">
+                  ${item.estimatedValue.toFixed(2)}
+                </p>
                   {item.purchasePrice !== null && (
                     <p>
                       <span className="font-medium text-gray-200">
