@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { notFound, redirect } from "next/navigation";
 import DeleteItemButton from "@/components/DeleteItemButton";
 import ItemControls from "@/components/ItemControls";
 import { prisma } from "@/lib/prisma";
@@ -20,6 +21,12 @@ export default async function CollectionPage({
   params,
   searchParams,
 }: CollectionPageProps) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const { id } = await params;
 
   const {
@@ -29,22 +36,23 @@ export default async function CollectionPage({
   } = await searchParams;
 
   const hasActiveFilters =
-  search.trim() !== "" || favorites === "true";
+    search.trim() !== "" || favorites === "true";
 
   const itemOrderBy =
-  sort === "oldest"
-    ? { createdAt: "asc" as const }
-    : sort === "name"
-      ? { name: "asc" as const }
-      : sort === "value-high"
-        ? { estimatedValue: "desc" as const }
-        : sort === "value-low"
-          ? { estimatedValue: "asc" as const }
-          : { createdAt: "desc" as const };
+    sort === "oldest"
+      ? { createdAt: "asc" as const }
+      : sort === "name"
+        ? { name: "asc" as const }
+        : sort === "value-high"
+          ? { estimatedValue: "desc" as const }
+          : sort === "value-low"
+            ? { estimatedValue: "asc" as const }
+            : { createdAt: "desc" as const };
 
-  const collection = await prisma.collection.findUnique({
+  const collection = await prisma.collection.findFirst({
     where: {
       id,
+      userId,
     },
     include: {
       items: {
@@ -72,7 +80,6 @@ export default async function CollectionPage({
               ]
             : undefined,
         },
-
         orderBy: itemOrderBy,
       },
       _count: {
@@ -111,9 +118,10 @@ export default async function CollectionPage({
               Items
             </h2>
 
-          <p className="mt-1 text-gray-400">
-            Showing {collection.items.length} of {collection._count.items} items
-          </p>
+            <p className="mt-1 text-gray-400">
+              Showing {collection.items.length} of{" "}
+              {collection._count.items} items
+            </p>
           </div>
 
           <Link
@@ -126,26 +134,27 @@ export default async function CollectionPage({
 
         <ItemControls collectionId={collection.id} />
 
-          {collection.items.length === 0 ? (
-            <div className="mt-8 rounded-lg border border-dashed border-gray-700 px-6 py-12 text-center">
-              <h3 className="text-lg font-semibold text-white">
-                {hasActiveFilters
-                  ? "No matching items"
-                  : "No items yet"}
-              </h3>
+        {collection.items.length === 0 ? (
+          <div className="mt-8 rounded-lg border border-dashed border-gray-700 px-6 py-12 text-center">
+            <h3 className="text-lg font-semibold text-white">
+              {hasActiveFilters
+                ? "No matching items"
+                : "No items yet"}
+            </h3>
 
-              <p className="mt-2 text-gray-400">
-                {hasActiveFilters
-                  ? "Try changing your search or removing the favorites filter."
-                  : "Add your first item to start building this collection."}
-              </p>
-            </div>
-          ) : (
+            <p className="mt-2 text-gray-400">
+              {hasActiveFilters
+                ? "Try changing your search or removing the favorites filter."
+                : "Add your first item to start building this collection."}
+            </p>
+          </div>
+        ) : (
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {collection.items.map((item) => (
               <article
                 key={item.id}
-                className="rounded-xl border border-gray-800 bg-gray-950 p-6 transition hover:-translate-y-1 hover:border-blue-700 hover:shadow-lg"              >
+                className="rounded-xl border border-gray-800 bg-gray-950 p-6 transition hover:-translate-y-1 hover:border-blue-700 hover:shadow-lg"
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-semibold text-white">
@@ -173,19 +182,20 @@ export default async function CollectionPage({
                 </p>
 
                 <div className="mt-6 space-y-2 text-sm text-gray-400">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-200">
-                    Condition:
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-200">
+                      Condition:
+                    </span>
 
-                  <span className="rounded-full bg-emerald-900/40 px-2 py-1 text-xs font-medium text-emerald-300">
-                    {item.condition.replaceAll("_", " ")}
-                  </span>
-                </div>
+                    <span className="rounded-full bg-emerald-900/40 px-2 py-1 text-xs font-medium text-emerald-300">
+                      {item.condition.replaceAll("_", " ")}
+                    </span>
+                  </div>
 
-                <p className="text-lg font-semibold text-green-400">
-                  ${item.estimatedValue.toFixed(2)}
-                </p>
+                  <p className="text-lg font-semibold text-green-400">
+                    ${item.estimatedValue.toFixed(2)}
+                  </p>
+
                   {item.purchasePrice !== null && (
                     <p>
                       <span className="font-medium text-gray-200">
@@ -206,18 +216,18 @@ export default async function CollectionPage({
                 </div>
 
                 <div className="mt-6 flex items-center justify-between">
-                <Link
-                  href={`/collections/${collection.id}/items/${item.id}/edit`}
-                  className="rounded-md border border-blue-900 px-3 py-2 text-sm font-medium text-blue-400 transition hover:bg-blue-950"
-                >
-                  Edit
-                </Link>
+                  <Link
+                    href={`/collections/${collection.id}/items/${item.id}/edit`}
+                    className="rounded-md border border-blue-900 px-3 py-2 text-sm font-medium text-blue-400 transition hover:bg-blue-950"
+                  >
+                    Edit
+                  </Link>
 
-                <DeleteItemButton
-                  itemId={item.id}
-                  collectionId={collection.id}
-                />
-              </div>
+                  <DeleteItemButton
+                    itemId={item.id}
+                    collectionId={collection.id}
+                  />
+                </div>
               </article>
             ))}
           </div>

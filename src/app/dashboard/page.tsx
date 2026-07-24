@@ -1,8 +1,19 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const collections = await prisma.collection.findMany({
+    where: {
+      userId,
+    },
     include: {
       items: {
         orderBy: {
@@ -39,9 +50,9 @@ export default async function DashboardPage() {
     )
     .slice(0, 5);
 
-    const mostValuableItem = [...allItems].sort(
-        (a, b) => b.estimatedValue - a.estimatedValue,
-    )[0];
+  const mostValuableItem = [...allItems].sort(
+    (a, b) => b.estimatedValue - a.estimatedValue,
+  )[0];
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
@@ -91,37 +102,37 @@ export default async function DashboardPage() {
         />
       </div>
 
-        <section className="mt-12">
-    <h2 className="text-2xl font-bold text-white">
-        Highlight
-    </h2>
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold text-white">
+          Highlight
+        </h2>
 
-    <div className="mt-6 rounded-xl border border-gray-800 bg-gray-950 p-8">
-        {mostValuableItem ? (
-        <>
-            <p className="text-sm uppercase tracking-wide text-gray-400">
-            Most Valuable Item
+        <div className="mt-6 rounded-xl border border-gray-800 bg-gray-950 p-8">
+          {mostValuableItem ? (
+            <>
+              <p className="text-sm uppercase tracking-wide text-gray-400">
+                Most Valuable Item
+              </p>
+
+              <h3 className="mt-3 text-3xl font-bold text-white">
+                {mostValuableItem.name}
+              </h3>
+
+              <p className="mt-2 text-gray-400">
+                {mostValuableItem.category || "Uncategorized"}
+              </p>
+
+              <p className="mt-6 text-4xl font-bold text-green-400">
+                ${mostValuableItem.estimatedValue.toFixed(2)}
+              </p>
+            </>
+          ) : (
+            <p className="text-gray-400">
+              Add some items to see highlights.
             </p>
-
-            <h3 className="mt-3 text-3xl font-bold text-white">
-            {mostValuableItem.name}
-            </h3>
-
-            <p className="mt-2 text-gray-400">
-            {mostValuableItem.category || "Uncategorized"}
-            </p>
-
-            <p className="mt-6 text-4xl font-bold text-green-400">
-            ${mostValuableItem.estimatedValue.toFixed(2)}
-            </p>
-        </>
-        ) : (
-        <p className="text-gray-400">
-            Add some items to see highlights.
-        </p>
-        )}
-    </div>
-    </section>
+          )}
+        </div>
+      </section>
 
       <section className="mt-12">
         <div>

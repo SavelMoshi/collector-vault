@@ -23,6 +23,7 @@ enum ItemCondition {
 
 model Collection {
   id          String   @id @default(cuid())
+  userId      String
   name        String
   description String?
   coverUrl    String?
@@ -30,6 +31,8 @@ model Collection {
   updatedAt   DateTime @updatedAt
 
   items Item[]
+
+  @@index([userId])
 }
 
 model Item {

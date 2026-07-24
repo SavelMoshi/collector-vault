@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { notFound, redirect } from "next/navigation";
 import { updateItem } from "@/actions/collection-actions";
 import { prisma } from "@/lib/prisma";
 
@@ -13,12 +14,21 @@ type EditItemPageProps = {
 export default async function EditItemPage({
   params,
 }: EditItemPageProps) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const { id, itemId } = await params;
 
   const item = await prisma.item.findFirst({
     where: {
       id: itemId,
       collectionId: id,
+      collection: {
+        userId,
+      },
     },
   });
 
@@ -124,12 +134,8 @@ export default async function EditItemPage({
             className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
           >
             <option value="MINT">Mint</option>
-            <option value="NEAR_MINT">
-              Near Mint
-            </option>
-            <option value="EXCELLENT">
-              Excellent
-            </option>
+            <option value="NEAR_MINT">Near Mint</option>
+            <option value="EXCELLENT">Excellent</option>
             <option value="GOOD">Good</option>
             <option value="FAIR">Fair</option>
             <option value="POOR">Poor</option>

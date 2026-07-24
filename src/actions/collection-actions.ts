@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -17,48 +18,85 @@ const collectionSchema = z.object({
     .max(300, "Description must be 300 characters or fewer."),
 });
 
-export async function createCollection(formData: FormData) {
-    const result = collectionSchema.safeParse({
-    name: formData.get("name"),
-    description: formData.get("description"),
-    });
+async function requireUserId() {
+  const { userId } = await auth();
 
-    if (!result.success) {
-    throw new Error(result.error.issues[0].message);
-    }
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
-    const { name, description } = result.data;
-
-    await prisma.collection.create({
-        data: {
-        name,
-        description,
-        },
-    });
-
-    revalidatePath("/collections");
-    redirect("/collections");
+  return userId;
 }
 
-export async function deleteCollection(id: string) {
+export async function createCollection(formData: FormData) {
+  const userId = await requireUserId();
 
-  await prisma.collection.delete({
-    where: {
-      id,
+  const result = collectionSchema.safeParse({
+    name: formData.get("name"),
+    description: formData.get("description"),
+  });
+
+  if (!result.success) {
+    throw new Error(result.error.issues[0].message);
+  }
+
+  const { name, description } = result.data;
+
+  await prisma.collection.create({
+    data: {
+      userId,
+      name,
+      description: description || null,
     },
   });
 
   revalidatePath("/collections");
+  redirect("/collections");
 }
 
-  export async function createItem(
+export async function deleteCollection(id: string) {
+  const userId = await requireUserId();
+
+  const result = await prisma.collection.deleteMany({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (result.count === 0) {
+    throw new Error(
+      "Collection not found or you do not have permission to delete it.",
+    );
+  }
+
+  revalidatePath("/collections");
+}
+
+export async function createItem(
   collectionId: string,
   formData: FormData,
 ) {
+  const userId = await requireUserId();
+
+  const collection = await prisma.collection.findFirst({
+    where: {
+      id: collectionId,
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!collection) {
+    throw new Error(
+      "Collection not found or you do not have permission to add items to it.",
+    );
+  }
+
   const name = formData.get("name") as string;
-
   const category = formData.get("category") as string;
-
   const description = formData.get("description") as string;
 
   const condition = formData.get("condition") as
@@ -88,8 +126,8 @@ export async function deleteCollection(id: string) {
   await prisma.item.create({
     data: {
       name,
-      category,
-      description,
+      category: category || null,
+      description: description || null,
       condition,
       estimatedValue,
       purchasePrice,
@@ -100,7 +138,6 @@ export async function deleteCollection(id: string) {
   });
 
   revalidatePath(`/collections/${collectionId}`);
-
   redirect(`/collections/${collectionId}`);
 }
 
@@ -108,11 +145,23 @@ export async function deleteItem(
   itemId: string,
   collectionId: string,
 ) {
-  await prisma.item.delete({
+  const userId = await requireUserId();
+
+  const result = await prisma.item.deleteMany({
     where: {
       id: itemId,
+      collectionId,
+      collection: {
+        userId,
+      },
     },
   });
+
+  if (result.count === 0) {
+    throw new Error(
+      "Item not found or you do not have permission to delete it.",
+    );
+  }
 
   revalidatePath(`/collections/${collectionId}`);
 }
@@ -122,6 +171,27 @@ export async function updateItem(
   collectionId: string,
   formData: FormData,
 ) {
+  const userId = await requireUserId();
+
+  const item = await prisma.item.findFirst({
+    where: {
+      id: itemId,
+      collectionId,
+      collection: {
+        userId,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!item) {
+    throw new Error(
+      "Item not found or you do not have permission to update it.",
+    );
+  }
+
   const name = formData.get("name") as string;
   const category = formData.get("category") as string;
   const description = formData.get("description") as string;

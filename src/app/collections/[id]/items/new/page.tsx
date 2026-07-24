@@ -1,5 +1,6 @@
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createItem } from "@/actions/collection-actions";
 
 type NewItemPageProps = {
@@ -11,11 +12,18 @@ type NewItemPageProps = {
 export default async function NewItemPage({
   params,
 }: NewItemPageProps) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const { id } = await params;
 
-  const collection = await prisma.collection.findUnique({
+  const collection = await prisma.collection.findFirst({
     where: {
       id,
+      userId,
     },
     select: {
       name: true,
@@ -38,10 +46,10 @@ export default async function NewItemPage({
         </p>
       </div>
 
-    <form
-    action={createItemWithCollectionId}
-    className="space-y-6 rounded-xl border border-gray-800 bg-gray-900 p-8"
-    >        
+      <form
+        action={createItemWithCollectionId}
+        className="space-y-6 rounded-xl border border-gray-800 bg-gray-900 p-8"
+      >
         <div>
           <label
             htmlFor="name"

@@ -1,24 +1,47 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 export default async function HomePage() {
-  const collectionCount = await prisma.collection.count();
-  const itemCount = await prisma.item.count();
+  const { userId } = await auth();
 
-  const totalValueResult = await prisma.item.aggregate({
-    _sum: {
-      estimatedValue: true,
-    },
-  });
+  let collectionCount = 0;
+  let itemCount = 0;
+  let totalValue = 0;
 
-  const totalValue =
-    totalValueResult._sum.estimatedValue ?? 0;
+  if (userId) {
+    const collections = await prisma.collection.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        items: {
+          select: {
+            estimatedValue: true,
+          },
+        },
+      },
+    });
+
+    collectionCount = collections.length;
+
+    const items = collections.flatMap(
+      (collection) => collection.items,
+    );
+
+    itemCount = items.length;
+
+    totalValue = items.reduce(
+      (sum, item) => sum + item.estimatedValue,
+      0,
+    );
+  }
 
   return (
     <main>
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="mx-auto max-w-4xl text-center">
-          <span className="inline-flex rounded-full border border-white-800 bg-white-950/40 px-4 py-2 text-sm font-medium text-white-300">
+          <span className="inline-flex rounded-full border border-gray-800 bg-gray-950/40 px-4 py-2 text-sm font-medium text-gray-300">
             Your collection, organized.
           </span>
 
@@ -34,37 +57,39 @@ export default async function HomePage() {
 
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
             <Link
-              href="/collections"
+              href={userId ? "/collections" : "/sign-up"}
               className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
             >
-              Explore Collections
+              {userId ? "Open My Collections" : "Create Your Vault"}
             </Link>
 
             <Link
-              href="/dashboard"
+              href={userId ? "/dashboard" : "/sign-in"}
               className="rounded-lg border border-gray-700 bg-gray-950 px-6 py-3 font-semibold text-gray-200 transition hover:border-gray-500 hover:bg-gray-900"
             >
-              View Dashboard
+              {userId ? "View Dashboard" : "Sign In"}
             </Link>
           </div>
         </div>
 
-        <div className="mt-20 grid gap-6 md:grid-cols-3">
-          <HomeStatCard
-            label="Collections"
-            value={collectionCount.toString()}
-          />
+        {userId && (
+          <div className="mt-20 grid gap-6 md:grid-cols-3">
+            <HomeStatCard
+              label="Collections"
+              value={collectionCount.toString()}
+            />
 
-          <HomeStatCard
-            label="Items Tracked"
-            value={itemCount.toString()}
-          />
+            <HomeStatCard
+              label="Items Tracked"
+              value={itemCount.toString()}
+            />
 
-          <HomeStatCard
-            label="Estimated Value"
-            value={`$${totalValue.toFixed(2)}`}
-          />
-        </div>
+            <HomeStatCard
+              label="Estimated Value"
+              value={`$${totalValue.toFixed(2)}`}
+            />
+          </div>
+        )}
       </section>
 
       <section className="border-y border-gray-800 bg-gray-950/50">
