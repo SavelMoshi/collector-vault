@@ -40,7 +40,7 @@ export default function RootLayout({
             <p>Collector Vault</p>
 
             <p>
-              Built with Next.js, TypeScript, Prisma, and SQLite.
+              Built with Next.js, TypeScript, Prisma, and PostgreSQL.
             </p>
           </div>
         </footer>
