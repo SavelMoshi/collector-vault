@@ -54,7 +54,7 @@ export default async function NewItemPage({
             id="name"
             name="name"
             type="text"
-            placeholder="Blue-Eyes White Dragon"
+            placeholder="Enter item name..."
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
         </div>
@@ -71,7 +71,7 @@ export default async function NewItemPage({
             id="category"
             name="category"
             type="text"
-            placeholder="Monster, Watch, Figure..."
+            placeholder="Enter category..."
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
         </div>
@@ -130,7 +130,7 @@ export default async function NewItemPage({
             type="number"
             min="0"
             step="0.01"
-            placeholder="25.00"
+            placeholder="Enter estimated value..."
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
         </div>
@@ -149,7 +149,7 @@ export default async function NewItemPage({
             type="number"
             min="0"
             step="0.01"
-            placeholder="15.99"
+            placeholder="Enter purchase price..."
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
         </div>
@@ -167,7 +167,7 @@ export default async function NewItemPage({
             name="releaseYear"
             type="number"
             min="0"
-            placeholder="2002"
+            placeholder="Enter release year..."
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
         </div>

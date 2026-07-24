@@ -1,36 +1,163 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Collector Vault
+
+A modern full-stack web application for organizing and managing collectible items in one place.
+
+Collector Vault allows users to create collections, add items, track estimated values, mark favorites, search and filter items, and view collection statistics through an interactive dashboard.
+
+---
+
+## Features
+
+- Create, edit, and delete collections
+- Create, edit, and delete items
+- Organize items by collection
+- Search items by name, category, or description
+- Sort items by:
+  - Date Added
+  - Name
+  - Estimated Value
+- Favorite important items
+- Track:
+  - Condition
+  - Purchase Price
+  - Estimated Value
+  - Release Year
+- Interactive dashboard
+  - Total Collections
+  - Total Items
+  - Favorite Items
+  - Collection Value
+  - Average Item Value
+  - Recently Added Items
+  - Most Valuable Item
+- Responsive design for desktop and mobile
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- Next.js (App Router)
+- React
+- TypeScript
+- Tailwind CSS
+
+### Backend
+
+- Next.js Server Actions
+- Prisma ORM
+- SQLite
+
+### Development
+
+- Git
+- GitHub
+- VS Code
+
+---
 
 ## Getting Started
 
-First, run the development server:
+Clone the repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/collector-vault.git
+```
+
+Navigate into the project
+
+```bash
+cd collector-vault
+```
+
+Install dependencies
+
+```bash
+npm install
+```
+
+Generate the Prisma Client
+
+```bash
+npx prisma generate
+```
+
+Run database migrations
+
+```bash
+npx prisma migrate dev
+```
+
+(Optional) Seed the database
+
+```bash
+npx prisma db seed
+```
+
+Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+collector-vault
+├── prisma
+│   ├── migrations
+│   ├── schema.prisma
+│   └── seed.ts
+├── public
+├── src
+│   ├── actions
+│   ├── app
+│   ├── components
+│   ├── generated
+│   └── lib
+└── README.md
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Future Improvements
 
-## Deploy on Vercel
+- User authentication
+- Cloud database (PostgreSQL)
+- Image uploads
+- Collection cover images
+- Import/Export collections
+- Charts and analytics
+- Dark/Light theme
+- Cloud deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## What I Learned
+
+This project helped strengthen my experience with:
+
+- Building full-stack applications using Next.js
+- Designing relational databases with Prisma
+- Server Actions
+- CRUD operations
+- Responsive UI development
+- TypeScript
+- Modern React patterns
+- Dashboard design
+- Search, filtering, and sorting
+
+---
+
+## License
+
+This project is available under the MIT License.

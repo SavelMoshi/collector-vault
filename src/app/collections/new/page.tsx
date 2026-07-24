@@ -29,7 +29,7 @@ export default function NewCollectionPage() {
             id="name"
             name="name"
             type="text"
-            placeholder="Yu-Gi-Oh!"
+            placeholder="Enter the name of this collection..."
             className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-white outline-none focus:border-blue-500"
           />
         </div>
