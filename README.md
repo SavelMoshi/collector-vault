@@ -49,7 +49,7 @@ Collector Vault allows users to create collections, add items, track estimated v
 
 - Next.js Server Actions
 - Prisma ORM
-- SQLite
+- PostgreSQL
 
 ### Development
 
@@ -128,21 +128,6 @@ collector-vault
 │   └── lib
 └── README.md
 ```
-
----
-
-## Future Improvements
-
-- User authentication
-- Cloud database (PostgreSQL)
-- Image uploads
-- Collection cover images
-- Import/Export collections
-- Charts and analytics
-- Dark/Light theme
-- Cloud deployment
-
----
 
 ## What I Learned
 
