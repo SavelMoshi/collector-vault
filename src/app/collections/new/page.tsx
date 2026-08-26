@@ -1,4 +1,5 @@
 import { createCollection } from "@/actions/collection-actions";
+import PendingSubmitButton from "@/components/PendingSubmitButton";
 
 export default function NewCollectionPage() {
   return (
@@ -51,12 +52,12 @@ export default function NewCollectionPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+        <PendingSubmitButton
+          pendingLabel="Creating..."
+          className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-900 disabled:text-blue-200"
         >
           Create Collection
-        </button>
+        </PendingSubmitButton>
       </form>
     </main>
   );

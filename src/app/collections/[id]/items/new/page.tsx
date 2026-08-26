@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { createItem } from "@/actions/collection-actions";
+import PendingSubmitButton from "@/components/PendingSubmitButton";
 
 type NewItemPageProps = {
   params: Promise<{
@@ -196,12 +197,12 @@ export default async function NewItemPage({
           </label>
         </div>
 
-        <button
-          type="submit"
-          className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+        <PendingSubmitButton
+          pendingLabel="Adding..."
+          className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-900 disabled:text-blue-200"
         >
           Add Item
-        </button>
+        </PendingSubmitButton>
       </form>
     </main>
   );

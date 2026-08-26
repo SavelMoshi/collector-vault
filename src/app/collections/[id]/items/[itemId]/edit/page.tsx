@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { notFound, redirect } from "next/navigation";
 import { updateItem } from "@/actions/collection-actions";
+import PendingSubmitButton from "@/components/PendingSubmitButton";
 import { prisma } from "@/lib/prisma";
 
 type EditItemPageProps = {
@@ -212,12 +213,12 @@ export default async function EditItemPage({
           Mark as favorite
         </label>
 
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+        <PendingSubmitButton
+          pendingLabel="Saving..."
+          className="w-full rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-900 disabled:text-blue-200"
         >
           Save Changes
-        </button>
+        </PendingSubmitButton>
       </form>
     </main>
   );

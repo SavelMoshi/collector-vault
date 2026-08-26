@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 type ItemControlsProps = {
@@ -11,46 +17,62 @@ export default function ItemControls({
 }: ItemControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const search = searchParams.get("search") ?? "";
   const favorites = searchParams.get("favorites") === "true";
   const sort = searchParams.get("sort") ?? "newest";
+  const [searchValue, setSearchValue] = useState(search);
 
-  function updateSearchParams(
-    updates: Record<string, string | null>,
-  ) {
-    const params = new URLSearchParams(
-      searchParams.toString(),
-    );
+  const updateSearchParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(
+        searchParams.toString(),
+      );
 
-    for (const [key, value] of Object.entries(updates)) {
-      if (!value) {
-        params.delete(key);
-      } else {
-        params.set(key, value);
+      for (const [key, value] of Object.entries(updates)) {
+        if (!value) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
       }
+
+      const query = params.toString();
+      const href = query
+        ? `/collections/${collectionId}?${query}`
+        : `/collections/${collectionId}`;
+
+      startTransition(() => {
+        router.replace(href, { scroll: false });
+      });
+    },
+    [collectionId, router, searchParams],
+  );
+
+  useEffect(() => {
+    const nextSearch = searchValue.trim();
+
+    if (nextSearch === search) {
+      return;
     }
 
-    const query = params.toString();
+    const timeoutId = window.setTimeout(() => {
+      updateSearchParams({
+        search: nextSearch || null,
+      });
+    }, 300);
 
-    router.push(
-      query
-        ? `/collections/${collectionId}?${query}`
-        : `/collections/${collectionId}`,
-    );
-  }
+    return () => window.clearTimeout(timeoutId);
+  }, [search, searchValue, updateSearchParams]);
 
   return (
     <div className="mt-8 grid gap-4 rounded-xl border border-gray-800 bg-gray-950 p-5 md:grid-cols-[1fr_auto_auto_auto]">
       <input
         type="search"
         placeholder="Search items..."
-        value={search}
-        onChange={(event) =>
-          updateSearchParams({
-            search: event.target.value || null,
-          })
-        }
+        value={searchValue}
+        onChange={(event) => setSearchValue(event.target.value)}
         className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-white outline-none transition placeholder:text-gray-500 focus:border-blue-500"
       />
 
@@ -91,16 +113,24 @@ export default function ItemControls({
         </option>
       </select>
 
-    <button
+      <button
         type="button"
-        onClick={() =>
-            router.push(`/collections/${collectionId}`)
+        onClick={() => {
+          setSearchValue("");
+          startTransition(() => {
+            router.replace(`/collections/${collectionId}`, {
+              scroll: false,
+            });
+          });
+        }}
+        disabled={
+          (!searchValue && !favorites && sort === "newest") ||
+          isPending
         }
-        disabled={!search && !favorites && sort === "newest"}
         className="rounded-lg border border-gray-700 bg-gray-900 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40"
-        >
+      >
         Clear
-    </button>
+      </button>
     </div>
   );
 }
