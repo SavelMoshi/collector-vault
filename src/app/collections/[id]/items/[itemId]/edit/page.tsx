@@ -155,9 +155,9 @@ export default async function EditItemPage({
             <input
               id="estimatedValue"
               name="estimatedValue"
-              type="number"
-              min="0"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]+([.][0-9]{1,2})?"
               required
               defaultValue={item.estimatedValue}
               className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
@@ -175,9 +175,9 @@ export default async function EditItemPage({
             <input
               id="purchasePrice"
               name="purchasePrice"
-              type="number"
-              min="0"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]+([.][0-9]{1,2})?"
               defaultValue={item.purchasePrice ?? ""}
               className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
             />
@@ -195,8 +195,9 @@ export default async function EditItemPage({
           <input
             id="releaseYear"
             name="releaseYear"
-            type="number"
-            min="0"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             defaultValue={item.releaseYear ?? ""}
             className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white outline-none transition focus:border-blue-500"
           />
